@@ -8,7 +8,7 @@ import java.net.*;
 import javax.swing.*;
 
 @SuppressWarnings("serial")
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements MessageListener {
     private static final String FRAME_TITLE = "Клиент мгновенных сообщений";
     private static final int FRAME_MINIMUM_WIDTH = 500;
     private static final int FRAME_MINIMUM_HEIGHT = 500;
@@ -58,6 +58,7 @@ public class MainFrame extends JFrame {
         });
 
         this.instantMessager = new InstantMessager();
+        this.instantMessager.addMessageListener(this);
 
         // Компоновка элементов панели "Сообщение"
         final GroupLayout layout2 = new GroupLayout(messagePanel);
@@ -109,21 +110,23 @@ public class MainFrame extends JFrame {
         final String message = textAreaOutgoing.getText();
         if (senderName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите имя отправителя", "Ошибка", JOptionPane.ERROR_MESSAGE);
-            return;
         }
         else if (destinationAddress.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите адрес узла-получателя", "Ошибка", JOptionPane.ERROR_MESSAGE);
-            return;
         }
         else if (message.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите текст сообщения", "Ошибка", JOptionPane.ERROR_MESSAGE);
-            return;
         }
         else {
             instantMessager.sendMessage(senderName, destinationAddress, message, SERVER_PORT);
             textAreaIncoming.setText(senderName + " (" + destinationAddress + ") : " + message);
             textAreaOutgoing.setText("");
         }
+    }
+    @Override
+    public void messageReceived(Peer senderName, String message) {
+        String str = senderName.getName() + " (" + senderName.getAddress().getHostName() + "): " + message;
+        //this.textAreaIncoming.setText(str);
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
