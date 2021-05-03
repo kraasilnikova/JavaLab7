@@ -1,21 +1,23 @@
 package bsu.rfe.java.group9.Krasilnikova;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 public class Peer {
-    private final String name;
-    private final InetSocketAddress address;
+    private String name;
+    private String address;
 
-    public Peer(String name, InetSocketAddress address) {
+    public Peer (String name, String address) {
         this.name = name;
         this.address = address;
     }
-
-    public InetSocketAddress getAddress() {
-        return this.address;
-    }
-
     public String getName() {
-        return this.name;
+        return name;
     }
+    public String getAddress() {
+        return address;
+    }
+    public Peer(String senderName, SocketAddress remoteSocketAddress) {
+    }
+
 }

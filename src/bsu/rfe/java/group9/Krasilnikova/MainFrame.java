@@ -5,6 +5,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.*;
 
 @SuppressWarnings("serial")
@@ -25,6 +29,9 @@ public class MainFrame extends JFrame implements MessageListener {
     private final JTextArea textAreaIncoming;
     private final JTextArea textAreaOutgoing;
     private InstantMessager instantMessager;
+    private ArrayList<Peer> UserInfo = new ArrayList<>(10);
+    private DialogFrame dialogFrame;
+    private boolean check = false;
 
     public MainFrame() {
         super(FRAME_TITLE);
@@ -110,23 +117,46 @@ public class MainFrame extends JFrame implements MessageListener {
         final String message = textAreaOutgoing.getText();
         if (senderName.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите имя отправителя", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        else if (destinationAddress.isEmpty()) {
+        if (destinationAddress.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите адрес узла-получателя", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        else if (message.isEmpty()) {
+        if (message.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Введите текст сообщения", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        else {
-            instantMessager.sendMessage(senderName, destinationAddress, message, SERVER_PORT);
-            textAreaIncoming.setText(senderName + " (" + destinationAddress + ") : " + message);
-            textAreaOutgoing.setText("");
+        Peer us = new Peer("Masha",  "127.0.0.1");
+        UserInfo.add(us);
+        check = false;
+        for(int i = 0; i < UserInfo.size(); i++) {
+            if(UserInfo.get(i).getAddress().equals(destinationAddress))
+                check = true;
         }
+        Peer users = new Peer(senderName,  destinationAddress);
+        UserInfo.add(users);
+
+        if (check == false) {
+            dialogFrame = new DialogFrame(users, MainFrame.this);
+            check = true;
+        }
+        instantMessager.sendMessage(senderName, destinationAddress, message, SERVER_PORT);
+        textAreaIncoming.setText(senderName + " (" + destinationAddress + ") : " + message);
+        textAreaIncoming.append("\n" + "Я -> " + destinationAddress + ": " + message + "\n");
+        textAreaOutgoing.setText("");
     }
     @Override
     public void messageReceived(Peer senderName, String message) {
-        String str = senderName.getName() + " (" + senderName.getAddress().getHostName() + "): " + message;
+        String str = senderName.getName() + " (" + senderName.getAddress() + "): " + message;
         //this.textAreaIncoming.setText(str);
+    }
+
+    public String getDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        return dateFormat.format(date);
+
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

@@ -1,15 +1,10 @@
 package bsu.rfe.java.group9.Krasilnikova;
 
 import javax.swing.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class InstantMessager implements MessageListener {
     private String sender;
@@ -24,6 +19,7 @@ public class InstantMessager implements MessageListener {
         try {
             // Создаем сокет для соединения
             final Socket socket = new Socket(destinationAddress, SERVER_PORT);
+            System.out.println(destinationAddress + "- Адрес получателя");
             // Открываем поток вывода данных
             final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             out.writeUTF(senderName);
@@ -36,7 +32,7 @@ public class InstantMessager implements MessageListener {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Не удалось отправить сообщение", "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
-    };
+    }
 
     private void startServer(int SERVER_PORT) {
         // Создание и запуск потока-обработчика запросов
@@ -51,9 +47,7 @@ public class InstantMessager implements MessageListener {
                         final String senderName = in.readUTF();
                         final String message = in.readUTF();
                         socket.close();
-                        InstantMessager.this.notifyListeners(new Peer(senderName, (InetSocketAddress) socket.getRemoteSocketAddress()), message);
-                        // Выводим сообщение в текстовую область
-                        //textAreaIncoming.append(senderName + " (" + address + "): " + message + "\n");
+                        InstantMessager.this.notifyListeners(new Peer(senderName, socket.getRemoteSocketAddress()), message);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
